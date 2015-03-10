@@ -12,7 +12,8 @@ Lexer::Lexer(string fileName)
 			_sourceCode += toupper(buf);
 		}
 		sourceFile.close();
-		cout << _sourceCode << endl;
+		//cout << _sourceCode << endl << endl;
+		GenerateLexemVector();
 	}
 	else
 	{
@@ -20,6 +21,46 @@ Lexer::Lexer(string fileName)
 	}
 }
 
+void Lexer::GenerateLexemVector()
+{
+	int i = 0;
+	string buf;
+	while (i < _sourceCode.length())
+	{
+		if (!isInAlphabet(_sourceCode[i]))
+		{
+			//TODO Throw exception
+			if (buf != "")
+				_lexemas.push_back(buf);
+			buf.clear();
+			++i;
+		}
+		else if (isCharLexemDivider(_sourceCode[i]))
+		{
+			if(buf != "")
+				_lexemas.push_back(buf);
+			++i;
+			buf.clear();
+		}
+		else if (isSingleCharacterLexem(_sourceCode[i]))
+		{
+			_lexemas.push_back(buf);
+			buf.clear();
+
+			buf += _sourceCode[i];
+			_lexemas.push_back(buf);
+			++i;
+			buf.clear();
+		}
+		else
+		{
+			buf += _sourceCode[i];
+			++i;
+		}
+	}
+	for (auto it : _lexemas)
+		cout << it << endl;
+}
 
 Lexer::~Lexer()
 {

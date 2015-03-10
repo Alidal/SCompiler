@@ -1,5 +1,6 @@
 #pragma once
 #include "Global.h"
+#include "Utilities.h"
 #include <fstream>
 #include <cctype>
 #include <iostream>
@@ -11,6 +12,7 @@ private:
 	vector<string> _lexemas;
 	string _sourceCode;
 	
+	void GenerateLexemVector();
 public:
 	Lexer() = delete;
 	Lexer(string fileName);
