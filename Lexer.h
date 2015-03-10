@@ -1,18 +1,24 @@
 #pragma once
 #include "Global.h"
 #include "Utilities.h"
+
 #include <fstream>
-#include <cctype>
+#include <algorithm>
+#include <map>
 #include <iostream>
 
 class Lexer
 {
 private:
-	enum class lexTypes {USER_IDENT, COMMAND_IDENT, ONE_SYMB};
-	vector<string> _lexemas;
-	string _sourceCode;
+	enum class LexType {USER_IDENT, COMMAND, SINGLE_SYMB, TEXT_CONST, DATA_TYPE, BIN_CONST,\
+						DEC_CONST, HEX_CONST, DIRECTIVE, REG32, REG16, REG8, SEG_REG};
+	vector<string> _lexems;
+	map<string, LexType> _tokens;
+	vector<string> _sourceCode;
 	
 	void GenerateLexemVector();
+	void AnalizeLexems();
+	void OutputTokens();
 public:
 	Lexer() = delete;
 	Lexer(string fileName);

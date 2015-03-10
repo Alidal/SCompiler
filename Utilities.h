@@ -1,12 +1,12 @@
 #pragma once
 #include "Global.h"
 
-const char cLF = 0xA;
-const char cCR = 0xD;
-
-bool isCompilerDirective(string s);
+bool isDirective(string s);
 bool isDataType(string s);
-bool isRegister(string s);
+bool is32Register(string s);
+bool is16Register(string s);
+bool is8Register(string s);
+bool isSegmentRegister(string s);
 bool isCommand(string s);
 bool isInAlphabet(char ch);
 bool isCharIdentifier(char ch);
