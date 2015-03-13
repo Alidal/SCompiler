@@ -12,8 +12,25 @@ Lexer::Lexer(string fileName)
 
 		sourceFile.close();
 
-		for (auto &i : _sourceCode)
-			transform(i.begin(), i.end(), i.begin(),::toupper);
+		bool isQuote = false;
+		for (auto &iter : _sourceCode)
+		{
+			int i = 0;
+			while (i < iter.length())
+			{
+				if (isCharQuote(iter[i]) && !isQuote)
+					isQuote = true;
+				else if (isCharQuote(iter[i]) && isQuote)
+					isQuote = false;
+
+				if (!isQuote)
+					iter[i] = toupper(iter[i]);
+				++i;
+			}
+			isQuote = false;
+		}
+		/*for (auto &i : _sourceCode)
+			transform(i.begin(), i.end(), i.begin(), ::toupper);*/
 		
 		GenerateLexemVector();
 		AnalizeLexems();

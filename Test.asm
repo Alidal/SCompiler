@@ -1,6 +1,6 @@
 Data1 Segment
     Vb     db 1056011b
-    String db "Test string new"
+    String db "Рядок test - new"
     Vw     dw 4567d
     Vd     dd 0d7856fdh
 Data1 ends
