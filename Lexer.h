@@ -5,24 +5,23 @@
 
 #include <fstream>
 #include <algorithm>
-#include <map>
 #include <iostream>
+#include <iomanip>
 
-struct Token
-{
-	string lexem;
-	LexType lexType;
-	int row;
-	int colomn;
-};
 class Lexer
 {
 private:
 	struct Lexem
 	{
-		string lexem;
+		string text;
 		int row;
-		int colomn;
+		int column;
+	};
+
+	struct Token
+	{
+		Lexem lex;
+		LexType lexType;
 	};
 
 	vector<Lexem> _lexems;

@@ -1,4 +1,4 @@
-#include "Lexer.h"
+﻿#include "Lexer.h"
 
 
 Lexer::Lexer(string fileName)
@@ -29,9 +29,7 @@ Lexer::Lexer(string fileName)
 			}
 			isQuote = false;
 		}
-		/*for (auto &i : _sourceCode)
-			transform(i.begin(), i.end(), i.begin(), ::toupper);*/
-		
+
 		GenerateLexemVector();
 		AnalizeLexems();
 		OutputTokens();
@@ -48,96 +46,84 @@ void Lexer::GenerateLexemVector()
 	int i;
 	Lexem buf;
 	buf.row = 0;
-	buf.colomn = 1;
+	buf.column = 1;
 	for (auto curRow : _sourceCode)
 	{
 		i = 0;
-		buf.lexem.clear();
+		buf.text.clear();
 		++buf.row;
+
+		err.row = buf.row;
+		err.codeRow = _sourceCode[buf.row - 1];
 
 		while (i < curRow.length())
 		{
 			if (!isInAlphabet(curRow[i]))
 			{
-				err.colomn = buf.colomn;
-				err.row = buf.row;
-				err.sourceRow = _sourceCode[buf.row - 1];
+				err.column = i;
 				err.errText = "Wrong character";
 				ERROR << err;
 
-				if (!buf.lexem.empty())
-					_lexems.push_back(buf);
-				
-				buf.colomn = i + 1;
-				buf.lexem.clear();
-				++i;
+				buf.text += curRow[i];
+
+				buf.column = ++i;
 			}
 			else if (isCharLexemDivider(curRow[i]))
 			{
-				if (!buf.lexem.empty())
+				if (!buf.text.empty())
 					_lexems.push_back(buf);
 
-				buf.colomn = i + 1;
-				buf.lexem.clear();
+				buf.column = i + 1;
+				buf.text.clear();
 				++i;
 			}
 			else if (isSingleCharacterLexem(curRow[i]))
 			{
 				_lexems.push_back(buf);
-				buf.colomn = i + 1;
-				buf.lexem.clear();
+				buf.column = i + 1;
+				buf.text.clear();
 
-				buf.lexem += curRow[i];
+				buf.text += curRow[i];
 				_lexems.push_back(buf);
-				buf.colomn = i + 1;
-				buf.lexem.clear();
+				buf.column = i + 1;
+				buf.text.clear();
 				++i;
 			}
 			else if (isCharQuote(curRow[i]))
 			{
-				buf.lexem += curRow[i];
+				buf.text += curRow[i];
 				++i;
 				while (i < curRow.length() && !isCharQuote(curRow[i]))
 				{
-					buf.lexem += curRow[i];
+					buf.text += curRow[i];
 					++i;
 				}
 
 				if (i == curRow.length())
 				{
-					err.colomn = buf.colomn;
-					err.row = buf.row;
-					err.sourceRow = _sourceCode[buf.row - 1];
+					err.column = i;
 					err.errText = "No close quote";
 					ERROR << err;
 				}
 				else
-					buf.lexem += curRow[i];
+					buf.text += curRow[i];
 
 				_lexems.push_back(buf);
-				buf.colomn = i + 1;
-				buf.lexem.clear();
+				buf.column = i + 1;
+				buf.text.clear();
 				++i;
-				
-			}
-			else if (isCharComment(curRow[i]))
-			{
-				if (!buf.lexem.empty())
-					_lexems.push_back(buf);
-				buf.colomn = i + 1;
-				//TODO Maybe add comments
-				i = curRow.length();
+
 			}
 			else
 			{
-				buf.lexem += curRow[i];
+				buf.text += curRow[i];
 				++i;
 			}
 		}
 
-		if (!buf.lexem.empty())
+		if (!buf.text.empty())
 			_lexems.push_back(buf);
-		buf.colomn = i + 1;
+		buf.column = i + 1;
 
 	}
 }
@@ -147,56 +133,54 @@ void Lexer::AnalizeLexems()
 	Token temp;
 	for (auto iter : _lexems)
 	{
-		temp.lexem = iter.lexem;
-		temp.row = iter.row;
-		temp.colomn = iter.colomn;
+		temp.lex.text = iter.text;
+		temp.lex.row = iter.row;
+		temp.lex.column = iter.column;
 
-		if (isCommand(iter.lexem))
+		if (isCommand(iter.text))
 			temp.lexType = LexType::COMMAND;
-		else if (isDataType(iter.lexem))
-			temp.lexType = LexType::DATA_TYPE;
-		else if (is32Register(iter.lexem))
+		else if (is32Register(iter.text))
 			temp.lexType = LexType::REG32;
-		else if (is16Register(iter.lexem))
+		else if (is16Register(iter.text))
 			temp.lexType = LexType::REG16;
-		else if (is8Register(iter.lexem))
+		else if (is8Register(iter.text))
 			temp.lexType = LexType::REG8;
-		else if (isSegmentRegister(iter.lexem))
+		else if (isSegmentRegister(iter.text))
 			temp.lexType = LexType::SEG_REG;
-		else if (isDirective(iter.lexem))
+		else if (isDirective(iter.text))
 			temp.lexType = LexType::DIRECTIVE;
-		else if (isCharQuote(iter.lexem[0]) && isCharQuote(iter.lexem[iter.lexem.length() - 1]))
+		else if (isCharQuote(iter.text[0]) && isCharQuote(iter.text[iter.text.length() - 1]))
 			temp.lexType = LexType::TEXT_CONST;
-		else if (isCharQuote(iter.lexem[0]) && !isCharQuote(iter.lexem[iter.lexem.length() - 1])) //TODO Try to optimize
+		else if (isCharQuote(iter.text[0]) && !isCharQuote(iter.text[iter.text.length() - 1])) //TODO Try to optimize
 			temp.lexType = LexType::WRONG_LEX;
-		else if (isCharNumber(iter.lexem[0]))
+		else if (isCharNumber(iter.text[0]))
 		{
 			string::size_type sz = 0;
 			int base = 10;
 
-			if (iter.lexem[iter.lexem.length() - 1] == 'B')
+			if (iter.text[iter.text.length() - 1] == 'B')
 			{
 				temp.lexType = LexType::BIN_CONST;
 				base = 2;
 			}
-			else if (iter.lexem[iter.lexem.length() - 1] == 'H')
+			else if (iter.text[iter.text.length() - 1] == 'H')
 			{
 				temp.lexType = LexType::HEX_CONST;
 				base = 16;
 			}
-			else if (iter.lexem[iter.lexem.length() - 1] == 'D' || isCharNumber(iter.lexem[iter.lexem.length() - 1]))
+			else if (iter.text[iter.text.length() - 1] == 'D' || isCharNumber(iter.text[iter.text.length() - 1]))
 				temp.lexType = LexType::DEC_CONST;
 
-			if (!isCharNumber(iter.lexem[iter.lexem.length() - 1]))
-				iter.lexem.pop_back();
+			if (!isCharNumber(iter.text[iter.text.length() - 1]))
+				temp.lex.text.pop_back();
 
-			stoll(iter.lexem, &sz, base); //TODO Fix numbers check
-			//cout << "Base: " << base << " : " << iter.lexem << " = " << stoi(iter.lexem, &sz, base) << " : sz = " << sz << endl;
-			if (sz == iter.lexem.length() && (temp.lexType != LexType::HEX_CONST && !isCharNumber(iter.lexem[iter.lexem.length() - 1])))
+			stoll(iter.text, &sz, base);
+			//cout << "Base: " << base << " : " << temp.lex.text << " = " << stoi(iter.text, &sz, base) << " : sz = " << sz << " == " << iter.text.length() << endl;
+			if (sz < iter.text.length()-1)
 			{
-				err.colomn = iter.colomn;
+				err.column = iter.column;
 				err.row = iter.row;
-				err.sourceRow = _sourceCode[iter.row - 1];
+				err.codeRow = _sourceCode[iter.row - 1];
 				err.errText = "Wrong number";
 				ERROR << err;
 
@@ -204,15 +188,20 @@ void Lexer::AnalizeLexems()
 			}
 
 		}
-		else if (iter.lexem.length() == 1)
+		else if (iter.text.length() == 1)
 		{
-			if (isSingleCharacterLexem(iter.lexem[0]))
+			if (isSingleCharacterLexem(iter.text[0]))
 				temp.lexType = LexType::SINGLE_SYMB;
 			else
 				temp.lexType = LexType::USER_IDENT;
 		}
 		else
+		{
 			temp.lexType = LexType::USER_IDENT;
+			for (auto n_iter : iter.text)
+				if (!isInAlphabet(n_iter))
+					temp.lexType = LexType::WRONG_LEX;
+		}
 
 		_tokens.push_back(temp);
 	}
@@ -224,7 +213,7 @@ void Lexer::OutputTokens()
 	string s;
 	for (auto iter : _tokens)
 	{
-		cout << "(" << iter.row << "," << iter.colomn << "): " << iter.lexem << " - ";
+		cout << "(" << setw(2) << iter.lex.row << "," << setw(2) << iter.lex.column << "): " << setw(8) << iter.lex.text << " - ";
 		switch (iter.lexType)
 		{
 		case LexType::USER_IDENT:

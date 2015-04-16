@@ -24,10 +24,10 @@ ExceptionProcesser& ExceptionProcesser::operator<<(ErrInfo info)
 	SetConsoleTextAttribute(hConsole, 4);
 	cout << "ERROR ";
 	SetConsoleTextAttribute(hConsole, 7);
-	cout << "(" << info.row << "," << info.colomn << "): " << info.errText << endl;
-	cout << info.sourceRow << endl;
+	cout << "(" << info.row << "," << info.column << "): " << info.errText << endl;
+	cout << info.codeRow << endl;
 
-	for (int i = 0; i < info.colomn; ++i)
+	for (int i = 0; i < info.column; ++i)
 		cout << " ";
 	cout << "^" << endl;
 	

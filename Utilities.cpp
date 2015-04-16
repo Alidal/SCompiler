@@ -1,16 +1,14 @@
 #pragma once
 #include "Utilities.h"
 
-const string directivesArray[] = { "END", "SEGMENT", "ENDS", "ASSUME" };
-const string dataTypesArray[] = { "DB", "DW", "DD" };
+const string directivesArray[] = { "END", "SEGMENT", "ENDS", "ASSUME", "DB", "DW", "DD" };
 const string registers32Array[] = { "EAX", "ECX", "EDX", "EBX", "ESP", "EBP", "ESI", "EDI" };
 const string registers16Array[] = { "AX", "CX", "DX", "BX", "SP", "BP", "SI", "DI" }; 
 const string registers8Array[] = { "AH", "AL", "CH", "CL", "DH", "DL", "BH", "BL" };
 const string segmentRegistersArray[] = { "CS", "DS", "SS", "ES", "FS", "GS" };
 const string commandsArray[] = { "NOP", "SHR", "NOT", "ADC", "SUB", "JC", "JMP" };
 
-const set<string> directives(directivesArray, directivesArray + 4);
-const set<string> dataTypes(dataTypesArray, dataTypesArray + 3);
+const set<string> directives(directivesArray, directivesArray + 7);
 const set<string> registers32(registers32Array, registers32Array + 8);
 const set<string> registers16(registers16Array, registers16Array + 8);
 const set<string> registers8(registers8Array, registers8Array + 8);
@@ -27,10 +25,6 @@ const char   commentChar = ';';
 bool isDirective(string s)
 {
 	return directives.find(s) != directives.end();
-}
-bool isDataType(string s)
-{
-	return dataTypes.find(s) != dataTypes.end();
 }
 
 bool is32Register(string s)

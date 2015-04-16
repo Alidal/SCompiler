@@ -7,9 +7,9 @@
 struct ErrInfo
 {
 	string errText;
-	string sourceRow;
+	string codeRow;
 	int row;
-	int colomn;
+	int column;
 };
 
 class ExceptionProcesser
