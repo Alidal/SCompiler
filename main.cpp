@@ -3,10 +3,12 @@
 #include <iostream>
 
 #include "Lexer.h"
+#include "SyntaxAnalizer.h"
 using namespace std;
 
 int main(int argc, char* argv[])
 {
 	Lexer analizer("Test.asm");
+	SyntaxAnalizer syntAnalizer(analizer.getTokens());
 	return 0;
 }

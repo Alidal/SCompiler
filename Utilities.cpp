@@ -86,3 +86,27 @@ bool isCharComment(char ch)
 {
 	return ch == commentChar;
 }
+
+vector<string> stringToHex(const string& input)
+{
+	const char* const alphabet = "0123456789ABCDEF";
+	size_t len = input.length();
+
+	vector<string> output;
+	string temp;
+	for (int i = 0; i < len; ++i)
+	{
+		const unsigned char c = input[i];
+		temp.push_back(alphabet[c >> 4]);
+		temp.push_back(alphabet[c & 15]);
+		output.push_back(temp);
+	}
+	return output;
+}
+
+string intToHex(const string& input, short base)
+{
+	stringstream stream;
+	stream << std::hex << stoi(input, nullptr, base);
+	return stream.str();
+}

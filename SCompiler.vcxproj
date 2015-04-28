@@ -82,6 +82,9 @@
     <ClInclude Include="ExceptionProcesser.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Lexer.h" />
+    <ClInclude Include="Operand.h" />
+    <ClInclude Include="Sentence.h" />
+    <ClInclude Include="SyntaxAnalizer.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Utilities.h" />
   </ItemGroup>
@@ -89,6 +92,9 @@
     <ClCompile Include="ExceptionProcesser.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Operand.cpp" />
+    <ClCompile Include="Sentence.cpp" />
+    <ClCompile Include="SyntaxAnalizer.cpp" />
     <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

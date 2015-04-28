@@ -1,5 +1,6 @@
 #pragma once
 #include "Global.h"
+#include <sstream>
 
 bool isDirective(string s);
 bool isDataType(string s);

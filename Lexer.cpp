@@ -8,12 +8,12 @@ Lexer::Lexer(string fileName)
 	{
 		string buf;
 		while (getline(sourceFile, buf))
-			_sourceCode.push_back(buf);
+			sourceCode.push_back(buf);
 
 		sourceFile.close();
 
 		bool isQuote = false;
-		for (auto &iter : _sourceCode)
+		for (auto &iter : sourceCode)
 		{
 			int i = 0;
 			while (i < iter.length())
@@ -47,14 +47,14 @@ void Lexer::GenerateLexemVector()
 	Lexem buf;
 	buf.row = 0;
 	buf.column = 1;
-	for (auto curRow : _sourceCode)
+	for (auto curRow : sourceCode)
 	{
 		i = 0;
 		buf.text.clear();
 		++buf.row;
 
 		err.row = buf.row;
-		err.codeRow = _sourceCode[buf.row - 1];
+		err.codeRow = sourceCode[buf.row - 1];
 
 		while (i < curRow.length())
 		{
@@ -71,7 +71,7 @@ void Lexer::GenerateLexemVector()
 			else if (isCharLexemDivider(curRow[i]))
 			{
 				if (!buf.text.empty())
-					_lexems.push_back(buf);
+					lexems.push_back(buf);
 
 				buf.column = i + 1;
 				buf.text.clear();
@@ -79,12 +79,15 @@ void Lexer::GenerateLexemVector()
 			}
 			else if (isSingleCharacterLexem(curRow[i]))
 			{
-				_lexems.push_back(buf);
-				buf.column = i + 1;
-				buf.text.clear();
+				if (!buf.text.empty())
+				{
+					lexems.push_back(buf);
+					buf.column = i + 1;
+					buf.text.clear();
+				}
 
 				buf.text += curRow[i];
-				_lexems.push_back(buf);
+				lexems.push_back(buf);
 				buf.column = i + 1;
 				buf.text.clear();
 				++i;
@@ -108,7 +111,7 @@ void Lexer::GenerateLexemVector()
 				else
 					buf.text += curRow[i];
 
-				_lexems.push_back(buf);
+				lexems.push_back(buf);
 				buf.column = i + 1;
 				buf.text.clear();
 				++i;
@@ -122,7 +125,7 @@ void Lexer::GenerateLexemVector()
 		}
 
 		if (!buf.text.empty())
-			_lexems.push_back(buf);
+			lexems.push_back(buf);
 		buf.column = i + 1;
 
 	}
@@ -131,7 +134,7 @@ void Lexer::GenerateLexemVector()
 void Lexer::AnalizeLexems()
 {
 	Token temp;
-	for (auto iter : _lexems)
+	for (auto iter : lexems)
 	{
 		temp.lex.text = iter.text;
 		temp.lex.row = iter.row;
@@ -178,9 +181,9 @@ void Lexer::AnalizeLexems()
 			//cout << "Base: " << base << " : " << temp.lex.text << " = " << stoi(iter.text, &sz, base) << " : sz = " << sz << " == " << iter.text.length() << endl;
 			if (sz < iter.text.length()-1)
 			{
-				err.column = iter.column;
+				err.column = iter.column + sz;
 				err.row = iter.row;
-				err.codeRow = _sourceCode[iter.row - 1];
+				err.codeRow = sourceCode[iter.row - 1];
 				err.errText = "Wrong number";
 				ERROR << err;
 
@@ -203,7 +206,7 @@ void Lexer::AnalizeLexems()
 					temp.lexType = LexType::WRONG_LEX;
 		}
 
-		_tokens.push_back(temp);
+		tokens.push_back(temp);
 	}
 }
 
@@ -211,7 +214,7 @@ void Lexer::OutputTokens()
 {
 	int i = 0;
 	string s;
-	for (auto iter : _tokens)
+	for (auto iter : tokens)
 	{
 		cout << "(" << setw(2) << iter.lex.row << "," << setw(2) << iter.lex.column << "): " << setw(8) << iter.lex.text << " - ";
 		switch (iter.lexType)
@@ -221,9 +224,6 @@ void Lexer::OutputTokens()
 			break;
 		case LexType::COMMAND:
 			s = "COMMAND";
-			break;
-		case LexType::DATA_TYPE:
-			s = "DATA_TYPE";
 			break;
 		case LexType::DIRECTIVE:
 			s = "DIRECTIVE";
@@ -261,6 +261,11 @@ void Lexer::OutputTokens()
 		}
 		cout << s << endl;
 	}
+}
+
+vector<Token> Lexer::getTokens()
+{
+	return tokens;
 }
 
 Lexer::~Lexer()

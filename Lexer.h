@@ -4,29 +4,15 @@
 #include "ExceptionProcesser.h"
 
 #include <fstream>
-#include <algorithm>
 #include <iostream>
 #include <iomanip>
 
 class Lexer
 {
 private:
-	struct Lexem
-	{
-		string text;
-		int row;
-		int column;
-	};
-
-	struct Token
-	{
-		Lexem lex;
-		LexType lexType;
-	};
-
-	vector<Lexem> _lexems;
-	vector<Token> _tokens;
-	vector<string> _sourceCode;
+	vector<Lexem> lexems;
+	vector<Token> tokens;
+	vector<string> sourceCode;
 
 	ErrInfo err;
 	
@@ -36,5 +22,6 @@ private:
 public:
 	Lexer() = delete;
 	Lexer(string fileName);
+	vector<Token> getTokens();
 	~Lexer();
 };
