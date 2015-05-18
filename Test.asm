@@ -1,8 +1,8 @@
 Data1 Segment
-    Vb     db 1056011b
-    String db "String test - new"
+    Vb     db 10011b
+    String db "Рядок test - new"
     Vw     dw 4567d
-    Vd     dd 0d7856dh
+    Vd     dd 0d7856fdh
 Data1 ends
 Data2 Segment
     Doublesg dw 678
@@ -16,10 +16,9 @@ Code Segment
     nop
     jmp label2
 label1:
-    adc vw[bp+di],ax
+    adc vw[bp+di], ax
     jc label2
     sub ax, vw[eax+edx]
-
     shr ax,1
     not vB[bp+di]
     Sub ax,vw[bp+di]

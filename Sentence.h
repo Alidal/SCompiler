@@ -2,20 +2,41 @@
 #include "Global.h"
 #include <iostream>
 #include <iomanip>
+#include "Utilities.h"
 #include "Operand.h"
 
 class Sentence
 {
-	vector<Token> wholeSentence;
-	int			  sentenceSize;
+	vector<Token>		wholeSentence;
+	vector<Segment>		&segTable;
+	vector<Label>		&labelTable;
+	map<string, string> &assumeTable;
 
 	Token			labelOrName;
 	Token		    command;
 	vector<Operand> operands;
+	int    sentenceSize;
+	int	   curOffset;
+	string sentenceSegment;
+
+	///////////////////
+	string commandCode;
+	string modRM;
+	string byteSIB;
+	string segChangePref;
+	string addrModeChangePref_Operand;
+	string addrModeChangePref_Address;
+	string imm;
+	string displacepment;
+	///////////////////
+
+	string generateCommandWithOpType(string);
+	void   updateLabelAndSegmentTables(int &curGlobalOffset);
 public:
-	Sentence(vector<Token> _wholeSentence);
+	Sentence(vector<Token> _wholeSentence, vector<Segment> &_segTable, vector<Label> &_labelTable, map<string, string> &_assumeTable);
 
 	void divideSentence();
+	void generateSentenceAttributes(int &curGlobalOffset);
 	void showSentence();
 
 	~Sentence();

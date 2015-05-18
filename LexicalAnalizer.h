@@ -7,7 +7,7 @@
 #include <iostream>
 #include <iomanip>
 
-class Lexer
+class LexicalAnalizer
 {
 private:
 	vector<Lexem> lexems;
@@ -15,13 +15,13 @@ private:
 	vector<string> sourceCode;
 
 	ErrInfo err;
-	
+
 	void GenerateLexemVector();
 	void AnalizeLexems();
 	void OutputTokens();
 public:
-	Lexer() = delete;
-	Lexer(string fileName);
+	LexicalAnalizer() = delete;
+	LexicalAnalizer(string fileName);
 	vector<Token> getTokens();
-	~Lexer();
+	~LexicalAnalizer();
 };

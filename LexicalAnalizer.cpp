@@ -1,7 +1,6 @@
-﻿#include "Lexer.h"
+﻿#include "LexicalAnalizer.h"
 
-
-Lexer::Lexer(string fileName)
+LexicalAnalizer::LexicalAnalizer(string fileName)
 {
 	ifstream sourceFile(fileName);
 	if (sourceFile.is_open())
@@ -32,16 +31,16 @@ Lexer::Lexer(string fileName)
 
 		GenerateLexemVector();
 		AnalizeLexems();
-		OutputTokens();
+		//OutputTokens();
 	}
 	else
 	{
 		ERROR << "File can\'t be opened. Check source file name.";
-		exit;
+		exit(1);
 	}
 }
 
-void Lexer::GenerateLexemVector()
+void LexicalAnalizer::GenerateLexemVector()
 {
 	int i;
 	Lexem buf;
@@ -115,7 +114,6 @@ void Lexer::GenerateLexemVector()
 				buf.column = i + 1;
 				buf.text.clear();
 				++i;
-
 			}
 			else
 			{
@@ -127,11 +125,10 @@ void Lexer::GenerateLexemVector()
 		if (!buf.text.empty())
 			lexems.push_back(buf);
 		buf.column = i + 1;
-
 	}
 }
 
-void Lexer::AnalizeLexems()
+void LexicalAnalizer::AnalizeLexems()
 {
 	Token temp;
 	for (auto iter : lexems)
@@ -178,8 +175,7 @@ void Lexer::AnalizeLexems()
 				temp.lex.text.pop_back();
 
 			stoll(iter.text, &sz, base);
-			//cout << "Base: " << base << " : " << temp.lex.text << " = " << stoi(iter.text, &sz, base) << " : sz = " << sz << " == " << iter.text.length() << endl;
-			if (sz < iter.text.length()-1)
+			if (sz < iter.text.length() - 1)
 			{
 				err.column = iter.column + sz;
 				err.row = iter.row;
@@ -189,7 +185,6 @@ void Lexer::AnalizeLexems()
 
 				temp.lexType = LexType::WRONG_LEX;
 			}
-
 		}
 		else if (iter.text.length() == 1)
 		{
@@ -203,14 +198,14 @@ void Lexer::AnalizeLexems()
 			temp.lexType = LexType::USER_IDENT;
 			for (auto n_iter : iter.text)
 				if (!isInAlphabet(n_iter))
-					temp.lexType = LexType::WRONG_LEX;
+				temp.lexType = LexType::WRONG_LEX;
 		}
 
 		tokens.push_back(temp);
 	}
 }
 
-void Lexer::OutputTokens()
+void LexicalAnalizer::OutputTokens()
 {
 	int i = 0;
 	string s;
@@ -263,11 +258,11 @@ void Lexer::OutputTokens()
 	}
 }
 
-vector<Token> Lexer::getTokens()
+vector<Token> LexicalAnalizer::getTokens()
 {
 	return tokens;
 }
 
-Lexer::~Lexer()
+LexicalAnalizer::~LexicalAnalizer()
 {
 }

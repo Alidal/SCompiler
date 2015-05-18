@@ -30,7 +30,7 @@ ExceptionProcesser& ExceptionProcesser::operator<<(ErrInfo info)
 	for (int i = 0; i < info.column; ++i)
 		cout << " ";
 	cout << "^" << endl;
-	
+
 	return *this;
 }
 

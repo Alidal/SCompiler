@@ -2,6 +2,7 @@
 #include "Global.h"
 #include <iostream>
 #include <Windows.h>
+#undef ERROR
 #define ERROR *ExceptionProcesser::GetInstance()
 
 struct ErrInfo
@@ -23,4 +24,3 @@ public:
 	ExceptionProcesser& operator << (string info);
 	ExceptionProcesser& operator << (ErrInfo info);
 };
-
