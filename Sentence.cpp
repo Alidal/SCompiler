@@ -16,6 +16,7 @@ Sentence::Sentence(vector<Token> _wholeSentence, vector<Segment> &_segTable, vec
 	addrModeChangePref_Address = "";
 	imm = "";
 	displacepment = "";
+	displacepmentSize = 0;
 }
 
 string Sentence::generateCommandWithOpType(string command)
@@ -130,6 +131,10 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 	{
 		commandCode   = getCommandCode(generateCommandWithOpType(command.lex.text));
 		sentenceSize += getCommandSize(generateCommandWithOpType(command.lex.text));
+
+		if (command.lex.text == "JC" || command.lex.text == "JMP")
+			++sentenceSize;
+
 	}
 	
 	for (auto iter : operands)
@@ -208,6 +213,30 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 				}
 			}
 			//end checking addr mode change prefix
+
+			//get displacement
+			bool checkDisp = false;
+			for (auto iter : operands)
+			{
+				if (!iter.label.lex.text.empty())
+				{
+					displacepment = intToHex(getLabelOffset(iter.label.lex.text, labelTable), 10);
+					checkDisp = true;
+				}
+
+				if (checkDisp)
+				{
+					if(!iter.address.empty())
+					{
+						if (iter.address[0].lexType == LexType::REG32)
+							displacepmentSize = 4;
+						else if (iter.address[0].lexType == LexType::REG16)
+							displacepmentSize = 2;
+					}
+				}
+			}
+			sentenceSize += displacepmentSize;
+			//end of getting displacement
 		}
 	}
 
@@ -217,12 +246,17 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 		//modRM = getModRMByte(operands);
 	//end checking byte mod r/m
 
+	//check byte SIB
+	if (!operands.empty())
+		byteSIB = intToHex(getSIBByte(operands), 2);
+	//modRM = getModRMByte(operands);
+	//end checking SIB
+
 	if (!segChangePref.empty())
 	{
 		++sentenceSize;
 		segChangePref += ":";
 	}
-	//end segment change pref
 
 	sentenceSegment = curSeg.name;
 	curOffset = curGlobalOffset;
@@ -247,6 +281,7 @@ void Sentence::showSentence()
 
 	if (!modRM.empty())
 		cout << setw(3) << modRM;
+	cout << byteSIB;
 
 	for (int i = 0; i < imm.size(); ++i)
 	{
@@ -259,6 +294,10 @@ void Sentence::showSentence()
 			cout << " ";
 		cout << imm[i];
 	}
+
+	if (displacepmentSize != 0)
+		cout << " " << setfill('0') << setw(displacepmentSize * 2) << displacepment << setfill(' ');
+
 
 	cout << " " << labelOrName.lex.text << " " << command.lex.text << " ";
 
@@ -289,6 +328,93 @@ void Sentence::showSentence()
 	}
 	cout << endl;
 }
+
+/*
+void Sentence::showSentence()
+{
+	int spaces = 25;
+	if (!sentenceSegment.empty())
+		cout << setfill('0') << setw(4) << intToHex(to_string(curOffset), 10) << setfill(' ');
+
+	if (!segChangePref.empty())
+	{
+		cout << setw(4) << segChangePref;
+		spaces -= 5;
+	}
+	if (!addrModeChangePref_Address.empty())
+	{
+		cout << setw(4) << addrModeChangePref_Address;
+		spaces -= 5;
+	}
+	if (!addrModeChangePref_Operand.empty())
+	{
+		cout << setw(4) << addrModeChangePref_Operand;
+		spaces -= 4;
+	}
+	if (!commandCode.empty())
+	{
+		cout << setw(3) << commandCode;
+		spaces -= 4;
+	}
+
+	if (!modRM.empty())
+	{
+		cout << setw(3) << modRM;
+		spaces -= 3;
+	}
+	if(!byteSIB.empty())
+	{
+		cout << byteSIB;
+		spaces -= 3;
+	}
+
+	for (int i = 0; i < imm.size(); ++i)
+	{
+		if (i % 21 == 0 && i != 0)
+		{
+			cout << endl;
+			cout << setw(5) << " ";
+		}
+		else if (i == 0)
+			cout << " ";
+		cout << imm[i];
+	}
+	spaces -= (imm.size() + 2);
+	if (displacepmentSize != 0)
+		cout << " " << setfill('0') << setw(displacepmentSize * 2) << displacepment << setfill(' ');
+	spaces -= displacepmentSize*2 + 1;
+
+	cout.width(spaces);
+
+	cout << " " << labelOrName.lex.text << " " << command.lex.text << " ";
+
+	if (!operands.empty())
+	{
+		for (int i = 0; i < operands.size(); ++i)
+		{
+			for (auto iter : operands[i].operand)
+			{
+				cout << iter.lex.text;
+
+				switch (iter.lexType)
+				{
+				case LexType::BIN_CONST:
+					cout << "B";
+					break;
+				case LexType::HEX_CONST:
+					cout << "H";
+					break;
+
+				default:
+					break;
+				}
+			}
+			if (i < operands.size() - 1)
+				cout << ",";
+		}
+	}
+	cout << endl;
+}*/
 
 Sentence::~Sentence()
 {

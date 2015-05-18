@@ -31,7 +31,9 @@ string setReversedByteSequence(const string input, short size);
 string getCommandCode(string name);
 string getSegmentPrefix(string name);
 string getLabelSegment(string label, vector<Label> labelTable, map<string, string> assumeTable);
+string getLabelOffset(string label, vector<Label> labelTable);
 string getModRMByte(vector<Operand> operands);
+string getSIBByte(vector<Operand> operands);
 int	   getCommandSize(string name);
 
 void   initRegNumbers();

@@ -24,7 +24,11 @@ Operand::Operand(vector<Token> _operand)
 		type = OpType::MEM;
 		int i = 0;
 		while (i < operand.size() && operand[i].lex.text != "[")
+		{
+			if (operand[i].lexType == LexType::USER_IDENT)
+				label = operand[i];
 			++i;
+		}
 		++i;
 		while (i < operand.size() && operand[i].lex.text != "]")
 		{

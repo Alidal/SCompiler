@@ -248,9 +248,20 @@ string getLabelSegment(string label, vector<Label> labelTable, map<string,string
 	return "";
 }
 
+string getLabelOffset(string label, vector<Label> labelTable)
+{
+	Label temp;
+	for (int i = 0; i < labelTable.size(); ++i)
+		if (labelTable[i].name == label)
+			return to_string(labelTable[i].value);
+	
+	//TODO Throw error "Undefined label"
+	return "";
+}
+
 string getModRMByte(vector<Operand> operands)
 {
-	string mod = "";
+	string mod;
 	string reg;
 	string rm;
 	bool isIMM = false;
@@ -281,9 +292,6 @@ string getModRMByte(vector<Operand> operands)
 					//TODO Throw error "Wrong registers pair"
 				break;
 			}
-		}
-		else
-		{
 		}
 	}
 	else //for commands with multiple operands
@@ -341,5 +349,29 @@ string getModRMByte(vector<Operand> operands)
 		else
 			return mod + rm + reg;
 
+	return "";
+}
+
+string getSIBByte(vector<Operand> operands)
+{
+	string ss = "00"; //x32
+	string index;
+	string base;
+
+	for (auto iter : operands)
+	{
+		if (!iter.address.empty())
+		{
+			if(iter.address[0].lexType == LexType::REG32 && iter.address[2].lexType == LexType::REG32)
+			{
+				base = getRegisterNumber(iter.address[0].lex.text);
+				index = getRegisterNumber(iter.address[2].lex.text);
+			}
+		}
+	}
+
+	if (!base.empty() && !index.empty())
+		return ss + index + base;
+	
 	return "";
 }

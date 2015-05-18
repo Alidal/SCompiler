@@ -8,6 +8,7 @@ public:
 
 	OpType type;
 
+	Token		  label;
 	vector<Token> operand;
 	vector<Token> address;
 	~Operand();

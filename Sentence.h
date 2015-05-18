@@ -17,6 +17,7 @@ class Sentence
 	vector<Operand> operands;
 	int    sentenceSize;
 	int	   curOffset;
+	int	   displacepmentSize;
 	string sentenceSegment;
 
 	///////////////////
