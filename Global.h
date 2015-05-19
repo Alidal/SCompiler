@@ -42,4 +42,12 @@ struct Label
 	string segName;
 };
 
+struct ErrInfo
+{
+	string errText;
+	string codeRow;
+	int row;
+	int column;
+};
+
 static Segment curSeg;

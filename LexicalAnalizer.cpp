@@ -57,9 +57,9 @@ void LexicalAnalizer::GenerateLexemVector()
 
 		while (i < curRow.length())
 		{
+			err.column = i + 1;
 			if (!isInAlphabet(curRow[i]))
 			{
-				err.column = i;
 				err.errText = "Wrong character";
 				ERROR << err;
 
@@ -103,7 +103,6 @@ void LexicalAnalizer::GenerateLexemVector()
 
 				if (i == curRow.length())
 				{
-					err.column = i;
 					err.errText = "No close quote";
 					ERROR << err;
 				}
@@ -177,7 +176,7 @@ void LexicalAnalizer::AnalizeLexems()
 			stoll(iter.text, &sz, base);
 			if (sz < iter.text.length() - 1)
 			{
-				err.column = iter.column + sz;
+				err.column = iter.column + sz + 1;
 				err.row = iter.row;
 				err.codeRow = sourceCode[iter.row - 1];
 				err.errText = "Wrong number";
@@ -261,6 +260,11 @@ void LexicalAnalizer::OutputTokens()
 vector<Token> LexicalAnalizer::getTokens()
 {
 	return tokens;
+}
+
+vector<string> LexicalAnalizer::getSourceCode()
+{
+	return sourceCode;
 }
 
 LexicalAnalizer::~LexicalAnalizer()

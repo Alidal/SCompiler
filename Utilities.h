@@ -6,6 +6,7 @@
 #include <map>
 #include <algorithm>
 #include <sstream>
+#include "ExceptionProcesser.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ string getCommandCode(string name);
 string getSegmentPrefix(string name);
 string getLabelSegment(string label, vector<Label> labelTable, map<string, string> assumeTable);
 string getLabelOffset(string label, vector<Label> labelTable);
+string getSegmentLength(string segment, vector<Segment> segTable);
 string getModRMByte(vector<Operand> operands);
 string getSIBByte(vector<Operand> operands);
 int	   getCommandSize(string name);
@@ -40,3 +42,5 @@ void   initRegNumbers();
 void   initCommandBytes();
 void   initSegmentReplacePrefixes();
 void   initReg16Combinations();
+
+int subHexNumbers(string op1, string op2);

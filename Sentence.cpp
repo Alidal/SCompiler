@@ -16,6 +16,7 @@ Sentence::Sentence(vector<Token> _wholeSentence, vector<Segment> &_segTable, vec
 	addrModeChangePref_Address = "";
 	imm = "";
 	displacepment = "";
+	jmpOffset = "";
 	displacepmentSize = 0;
 }
 
@@ -170,6 +171,7 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 			//check segment change pref
 			for (int i = 0; i < iter.operand.size(); ++i)
 			{
+				err.column = iter.operand[i].lex.column + 1;
 				if (!curSeg.name.empty() && iter.operand[i].lexType == LexType::SEG_REG && iter.operand[i + 1].lex.text == ":")
 				{
 					for(auto label_iter : labelTable)
@@ -179,11 +181,12 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 						}
 						else
 						{
-							//TODO Throw error "WRONG SEGMENT FOR VARIABLE"
+							ERROR << "Wrong segment for variable";
+							return;
 						}
 				}
 
-				else if (iter.operand[i].lexType == LexType::USER_IDENT)
+				else if (command.lex.text != "ASSUME" && iter.operand[i].lexType == LexType::USER_IDENT)
 				{
 					string labelSeg = getLabelSegment(iter.operand[i].lex.text, labelTable, assumeTable);
 					if ((labelSeg == "DS" && iter.address[0].lex.text == "BP") || \
@@ -199,6 +202,7 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 			//check addr mode change prefix
 			for (auto iter : operands)
 			{
+				err.column = iter.operand[0].lex.column + 1;
 				if (!iter.address.empty()) //for address
 					for (auto op_iter : iter.address)
 						if (op_iter.lexType == LexType::REG32)
@@ -218,7 +222,7 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 			bool checkDisp = false;
 			for (auto iter : operands)
 			{
-				if (!iter.label.lex.text.empty())
+				if (!iter.label.lex.text.empty() && command.lex.text != "ASSUME")
 				{
 					displacepment = intToHex(getLabelOffset(iter.label.lex.text, labelTable), 10);
 					checkDisp = true;
@@ -243,7 +247,6 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 	//check byte mod r/m
 	if (!operands.empty() && command.lex.text != "ASSUME")
 		modRM = intToHex(getModRMByte(operands), 2);
-		//modRM = getModRMByte(operands);
 	//end checking byte mod r/m
 
 	//check byte SIB
@@ -263,6 +266,18 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 	updateLabelAndSegmentTables(curGlobalOffset);
 
 	curGlobalOffset += sentenceSize;
+}
+
+void Sentence::generateJumpOpcode()
+{
+	if (command.lex.text == "JMP" || command.lex.text == "JC")
+	{
+		string labelOffset = getLabelOffset(operands[0].operand[0].lex.text, labelTable);
+		if (curOffset < stoi(labelOffset, nullptr, 16))
+			jmpOffset = labelOffset;
+		else
+			jmpOffset = to_string(subHexNumbers("FF", intToHex(to_string(curOffset), 10)));
+	}
 }
 
 void Sentence::showSentence()
@@ -297,7 +312,9 @@ void Sentence::showSentence()
 
 	if (displacepmentSize != 0)
 		cout << " " << setfill('0') << setw(displacepmentSize * 2) << displacepment << setfill(' ');
-
+	
+	if (!jmpOffset.empty())
+		cout << setw(3) << intToHex(jmpOffset, 10);
 
 	cout << " " << labelOrName.lex.text << " " << command.lex.text << " ";
 

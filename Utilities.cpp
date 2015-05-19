@@ -243,7 +243,7 @@ string getLabelSegment(string label, vector<Label> labelTable, map<string,string
 		return assumeTable.find(fullSegName)->second;
 	else
 	{
-		//TODO throw error "No such label"
+		ERROR << "No such label";
 	}
 	return "";
 }
@@ -255,7 +255,17 @@ string getLabelOffset(string label, vector<Label> labelTable)
 		if (labelTable[i].name == label)
 			return to_string(labelTable[i].value);
 	
-	//TODO Throw error "Undefined label"
+	return "";
+}
+
+string getSegmentLength(string segment, vector<Segment> segTable)
+{
+	for (auto iter : segTable)
+	{
+		if (iter.name == segment)
+			return to_string(iter.length);
+	}
+
 	return "";
 }
 
@@ -289,7 +299,10 @@ string getModRMByte(vector<Operand> operands)
 					reg = get16RegistersCombination(reg);
 				}
 				else
-					//TODO Throw error "Wrong registers pair"
+				{
+					err.column = operands[0].address[2].lex.column + 1;
+					ERROR << "Wrong register pair. Second operand should be x16 to";
+				}
 				break;
 			}
 		}
@@ -374,4 +387,9 @@ string getSIBByte(vector<Operand> operands)
 		return ss + index + base;
 	
 	return "";
+}
+
+int subHexNumbers(string op1, string op2)
+{
+	return stoi(op1, nullptr, 16) - stoi(op2, nullptr, 16);
 }

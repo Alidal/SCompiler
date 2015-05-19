@@ -1,6 +1,8 @@
 #include "SyntaxAnalizer.h"
 
-SyntaxAnalizer::SyntaxAnalizer(vector<Token> _tokens) : tokens(_tokens)
+SyntaxAnalizer::SyntaxAnalizer(vector<Token> _tokens, vector<string> _codeSource) :
+	tokens(_tokens),
+	codeSource(_codeSource)
 {
 	initCommandBytes();
 	initSegmentReplacePrefixes();
@@ -8,6 +10,7 @@ SyntaxAnalizer::SyntaxAnalizer(vector<Token> _tokens) : tokens(_tokens)
 	initReg16Combinations();
 
 	GenerateSentencesStruct();
+	GenerateJumpOpcodes();
 	for (auto iter : sentences)
 		iter.showSentence();
 
@@ -18,9 +21,14 @@ SyntaxAnalizer::SyntaxAnalizer(vector<Token> _tokens) : tokens(_tokens)
 void SyntaxAnalizer::GenerateSentencesStruct()
 {
 	vector<Token> curRow;
+	int rowIter = 0;
 	int curOffset = 0;
 	for (int i = 0; i < tokens.size() - 1; ++i)
 	{
+		err.codeRow = codeSource[rowIter + 1];
+		err.row = rowIter + 1;
+		err.column = 1;
+
 		while (i < tokens.size() - 1 && tokens[i].lex.row == tokens[i + 1].lex.row)
 		{
 			curRow.push_back(tokens[i]);
@@ -31,7 +39,14 @@ void SyntaxAnalizer::GenerateSentencesStruct()
 		sentences.back().divideSentence();
 		sentences.back().generateSentenceAttributes(curOffset);
 		curRow.clear();
+		++rowIter;
 	}
+}
+
+void SyntaxAnalizer::GenerateJumpOpcodes()
+{
+	for (auto &iter : sentences)
+		iter.generateJumpOpcode();
 }
 
 

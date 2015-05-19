@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include "Utilities.h"
+#include "ExceptionProcesser.h"
 #include "Operand.h"
 
 class Sentence
@@ -29,6 +30,7 @@ class Sentence
 	string addrModeChangePref_Address;
 	string imm;
 	string displacepment;
+	string jmpOffset;
 	///////////////////
 
 	string generateCommandWithOpType(string);
@@ -38,6 +40,7 @@ public:
 
 	void divideSentence();
 	void generateSentenceAttributes(int &curGlobalOffset);
+	void generateJumpOpcode();
 	void showSentence();
 
 	~Sentence();

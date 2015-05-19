@@ -5,13 +5,7 @@
 #undef ERROR
 #define ERROR *ExceptionProcesser::GetInstance()
 
-struct ErrInfo
-{
-	string errText;
-	string codeRow;
-	int row;
-	int column;
-};
+extern ErrInfo err;
 
 class ExceptionProcesser
 {

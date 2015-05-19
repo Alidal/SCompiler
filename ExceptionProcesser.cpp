@@ -1,5 +1,7 @@
 #include "ExceptionProcesser.h"
 
+ErrInfo err;
+
 ExceptionProcesser* ExceptionProcesser::m_instance = nullptr;
 
 ExceptionProcesser* ExceptionProcesser::GetInstance()
@@ -27,8 +29,7 @@ ExceptionProcesser& ExceptionProcesser::operator<<(ErrInfo info)
 	cout << "(" << info.row << "," << info.column << "): " << info.errText << endl;
 	cout << info.codeRow << endl;
 
-	for (int i = 0; i < info.column; ++i)
-		cout << " ";
+	cout.width(info.column);
 	cout << "^" << endl;
 
 	return *this;
@@ -36,10 +37,20 @@ ExceptionProcesser& ExceptionProcesser::operator<<(ErrInfo info)
 
 ExceptionProcesser& ExceptionProcesser::operator<<(string info)
 {
+
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, 4);
+	cout << "ERROR ";
+	SetConsoleTextAttribute(hConsole, 7);
+	cout << "(" << err.row << "," << err.column << "): " << info << endl;
+	cout << err.codeRow << endl;
+
+	cout.width(err.column);
+	cout << "^" << endl;
+	/*HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, 4);
 	cout << "ERROR: ";
 	SetConsoleTextAttribute(hConsole, 7);
-	cout << info << endl;
+	cout << info << endl;*/
 	return *this;
 }

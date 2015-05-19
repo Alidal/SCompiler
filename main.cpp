@@ -9,6 +9,6 @@
 int main(int argc, char* argv[])
 {
 	LexicalAnalizer analizer("Test.asm");
-	SyntaxAnalizer syntAnalizer(analizer.getTokens());
+	SyntaxAnalizer syntAnalizer(analizer.getTokens(), analizer.getSourceCode());
 	return 0;
 }

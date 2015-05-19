@@ -14,14 +14,13 @@ private:
 	vector<Token> tokens;
 	vector<string> sourceCode;
 
-	ErrInfo err;
-
 	void GenerateLexemVector();
 	void AnalizeLexems();
 	void OutputTokens();
 public:
 	LexicalAnalizer() = delete;
 	LexicalAnalizer(string fileName);
-	vector<Token> getTokens();
+	vector<Token>  getTokens();
+	vector<string> getSourceCode();
 	~LexicalAnalizer();
 };
