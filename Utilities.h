@@ -10,6 +10,8 @@
 
 using namespace std;
 
+extern ofstream file;
+
 bool isDirective(string s);
 bool isDataType(string s);
 bool is32Register(string s);
@@ -37,6 +39,7 @@ string getSegmentLength(string segment, vector<Segment> segTable);
 string getModRMByte(vector<Operand> operands);
 string getSIBByte(vector<Operand> operands);
 int	   getCommandSize(string name);
+bool   checkIsInLabelTable(string name, vector<Label> labelTable);
 
 void   initRegNumbers();
 void   initCommandBytes();
@@ -44,3 +47,4 @@ void   initSegmentReplacePrefixes();
 void   initReg16Combinations();
 
 int subHexNumbers(string op1, string op2);
+int sumHexNumbers(string op1, string op2);

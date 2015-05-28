@@ -1,5 +1,6 @@
 #pragma once
 #include "Global.h"
+#include "Utilities.h"
 #include <iostream>
 #include <Windows.h>
 #undef ERROR
@@ -16,5 +17,4 @@ public:
 	~ExceptionProcesser();
 	static ExceptionProcesser* GetInstance();
 	ExceptionProcesser& operator << (string info);
-	ExceptionProcesser& operator << (ErrInfo info);
 };

@@ -24,13 +24,13 @@ string Sentence::generateCommandWithOpType(string command)
 {
 	for (auto iter : operands)
 	{
-		if (iter.type == OPREG8)
+		if (iter.type == OpType::OPREG8)
 			command += "_reg8";
-		else if (iter.type == OPREG16 || iter.type == OPREG32)
+		else if (iter.type == OpType::OPREG16 || iter.type == OpType::OPREG32)
 			command += "_reg16-32";
-		else if (iter.type == MEM)
+		else if (iter.type == OpType::MEM)
 			command += "_mem";
-		else if (iter.type == IMM)
+		else if (iter.type == OpType::IMM)
 			command += "_imm";
 	}
 	return command;
@@ -110,7 +110,7 @@ void Sentence::updateLabelAndSegmentTables(int &curGlobalOffset)
 
 void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 {
-	
+
 	sentenceSize = 0;
 	if (command.lex.text == "SEGMENT" || command.lex.text == "ENDS")
 	{}
@@ -125,29 +125,51 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 		sentenceSize = 2;
 	else if (command.lex.text == "DB")
 	{
-		if (operands.size() != 0 && operands[0].type != TXT)
+		if (operands.size() != 0 && operands[0].type != OpType::TXT)
 			sentenceSize = 1;
+	}
+	else if (command.lex.text == "JC")
+	{
+		if (checkIsInLabelTable(operands[0].operand[0].lex.text, labelTable))
+		{
+			commandCode = getCommandCode("JC_islabel");
+			++sentenceSize;
+		}
+		else
+		{
+			commandCode = getCommandCode("JC_nolabel");
+			sentenceSize += 2;
+		}
+
+		sentenceSize += commandCode.size() / 2;
+	}
+	else if (command.lex.text == "JMP")
+	{
+		commandCode = getCommandCode("JMP");
+		if (!checkIsInLabelTable(operands[0].operand[0].lex.text, labelTable))
+		{
+			displacepment = "90";
+			++sentenceSize;
+		}
+		sentenceSize += 1; //jmp code size
+		++sentenceSize; //label offset
 	}
 	else if (command.lex.text != "")
 	{
 		commandCode   = getCommandCode(generateCommandWithOpType(command.lex.text));
 		sentenceSize += getCommandSize(generateCommandWithOpType(command.lex.text));
-
-		if (command.lex.text == "JC" || command.lex.text == "JMP")
-			++sentenceSize;
-
 	}
-	
+
 	for (auto iter : operands)
 	{
-		if (iter.type == TXT)
+		if (iter.type == OpType::TXT)
 		{
 			sentenceSize += iter.operand[0].lex.text.size() - 2; //text constant size - 2 quotes
 			imm = stringToHex(iter.operand[0].lex.text);
 		}
-		else if (iter.type == OPREG16 || iter.type == OPREG32)
-			++sentenceSize; // addr mode change pref
-		else if (iter.type == IMM)
+		/*else if (iter.type == OPREG16 || iter.type == OPREG32)
+			++sentenceSize; // addr mode change pref*/
+		else if (iter.type == OpType::IMM)
 		{
 			if(command.lex.text != "SHR")
 				switch (iter.operand[0].lexType)
@@ -164,9 +186,9 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 				default:
 					break;
 				}
-				
+
 		}
-		else if (iter.type == MEM)
+		else if (iter.type == OpType::MEM)
 		{
 			//check segment change pref
 			for (int i = 0; i < iter.operand.size(); ++i)
@@ -210,7 +232,7 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 							++sentenceSize;
 							addrModeChangePref_Address = "67|";
 						}
-				if(iter.type == OPREG32) //for operands
+				if(iter.type == OpType::OPREG32) //for operands
 				{
 					++sentenceSize;
 					addrModeChangePref_Operand = "66|";
@@ -248,11 +270,12 @@ void Sentence::generateSentenceAttributes(int &curGlobalOffset)
 	if (!operands.empty() && command.lex.text != "ASSUME")
 		modRM = intToHex(getModRMByte(operands), 2);
 	//end checking byte mod r/m
+	if (!modRM.empty())
+		++sentenceSize;
 
 	//check byte SIB
 	if (!operands.empty())
 		byteSIB = intToHex(getSIBByte(operands), 2);
-	//modRM = getModRMByte(operands);
 	//end checking SIB
 
 	if (!segChangePref.empty())
@@ -276,7 +299,7 @@ void Sentence::generateJumpOpcode()
 		if (curOffset < stoi(labelOffset, nullptr, 16))
 			jmpOffset = labelOffset;
 		else
-			jmpOffset = to_string(subHexNumbers("FF", intToHex(to_string(curOffset), 10)));
+			jmpOffset = to_string(sumHexNumbers(intToHex(to_string(subHexNumbers("FF", intToHex(to_string(curOffset), 10))),10), "4"));
 	}
 }
 
@@ -292,7 +315,7 @@ void Sentence::showSentence()
 	if (!addrModeChangePref_Operand.empty())
 		cout << setw(4) << addrModeChangePref_Operand;
 	if (!commandCode.empty())
-		cout << setw(3) << commandCode;
+		cout << " " << setw(2) << commandCode;
 
 	if (!modRM.empty())
 		cout << setw(3) << modRM;
@@ -310,11 +333,16 @@ void Sentence::showSentence()
 		cout << imm[i];
 	}
 
-	if (displacepmentSize != 0)
-		cout << " " << setfill('0') << setw(displacepmentSize * 2) << displacepment << setfill(' ');
-	
 	if (!jmpOffset.empty())
-		cout << setw(3) << intToHex(jmpOffset, 10);
+	{
+		if(commandCode.size() > 2)
+			cout << " " << setw(4) << setfill('0') << intToHex(jmpOffset, 10) << setfill(' ');
+		else
+			cout << setw(3) << intToHex(jmpOffset, 10);
+	}
+
+	if (!displacepment.empty())
+		cout << " " << setfill('0') << setw(displacepmentSize * 2) << displacepment << setfill(' ');
 
 	cout << " " << labelOrName.lex.text << " " << command.lex.text << " ";
 
@@ -346,64 +374,48 @@ void Sentence::showSentence()
 	cout << endl;
 }
 
-/*
-void Sentence::showSentence()
+void Sentence::printSentenceToFile()
 {
-	int spaces = 25;
 	if (!sentenceSegment.empty())
-		cout << setfill('0') << setw(4) << intToHex(to_string(curOffset), 10) << setfill(' ');
+		file << setfill('0') << setw(4) << intToHex(to_string(curOffset), 10) << setfill(' ');
 
 	if (!segChangePref.empty())
-	{
-		cout << setw(4) << segChangePref;
-		spaces -= 5;
-	}
+		file << setw(4) << segChangePref;
 	if (!addrModeChangePref_Address.empty())
-	{
-		cout << setw(4) << addrModeChangePref_Address;
-		spaces -= 5;
-	}
+		file << setw(4) << addrModeChangePref_Address;
 	if (!addrModeChangePref_Operand.empty())
-	{
-		cout << setw(4) << addrModeChangePref_Operand;
-		spaces -= 4;
-	}
+		file << setw(4) << addrModeChangePref_Operand;
 	if (!commandCode.empty())
-	{
-		cout << setw(3) << commandCode;
-		spaces -= 4;
-	}
+		file << " " << setw(2) << commandCode;
 
 	if (!modRM.empty())
-	{
-		cout << setw(3) << modRM;
-		spaces -= 3;
-	}
-	if(!byteSIB.empty())
-	{
-		cout << byteSIB;
-		spaces -= 3;
-	}
+		file << setw(3) << modRM;
+	file << byteSIB;
 
 	for (int i = 0; i < imm.size(); ++i)
 	{
 		if (i % 21 == 0 && i != 0)
 		{
-			cout << endl;
-			cout << setw(5) << " ";
+			file << endl;
+			file << setw(5) << " ";
 		}
 		else if (i == 0)
-			cout << " ";
-		cout << imm[i];
+			file << " ";
+		file << imm[i];
 	}
-	spaces -= (imm.size() + 2);
-	if (displacepmentSize != 0)
-		cout << " " << setfill('0') << setw(displacepmentSize * 2) << displacepment << setfill(' ');
-	spaces -= displacepmentSize*2 + 1;
 
-	cout.width(spaces);
+	if (!jmpOffset.empty())
+	{
+		if (commandCode.size() > 2)
+			file << " " << setw(4) << setfill('0') << intToHex(jmpOffset, 10) << setfill(' ');
+		else
+			file << setw(3) << intToHex(jmpOffset, 10);
+	}
 
-	cout << " " << labelOrName.lex.text << " " << command.lex.text << " ";
+	if (!displacepment.empty())
+		file << " " << setfill('0') << setw(displacepmentSize * 2) << displacepment << setfill(' ');
+
+	file << " " << labelOrName.lex.text << " " << command.lex.text << " ";
 
 	if (!operands.empty())
 	{
@@ -411,15 +423,15 @@ void Sentence::showSentence()
 		{
 			for (auto iter : operands[i].operand)
 			{
-				cout << iter.lex.text;
+				file << iter.lex.text;
 
 				switch (iter.lexType)
 				{
 				case LexType::BIN_CONST:
-					cout << "B";
+					file << "B";
 					break;
 				case LexType::HEX_CONST:
-					cout << "H";
+					file << "H";
 					break;
 
 				default:
@@ -427,11 +439,12 @@ void Sentence::showSentence()
 				}
 			}
 			if (i < operands.size() - 1)
-				cout << ",";
+				file << ",";
 		}
 	}
-	cout << endl;
-}*/
+	file << endl;
+}
+
 
 Sentence::~Sentence()
 {

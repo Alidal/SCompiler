@@ -60,8 +60,7 @@ void LexicalAnalizer::GenerateLexemVector()
 			err.column = i + 1;
 			if (!isInAlphabet(curRow[i]))
 			{
-				err.errText = "Wrong character";
-				ERROR << err;
+				ERROR << "Wrong character";
 
 				buf.text += curRow[i];
 
@@ -103,8 +102,7 @@ void LexicalAnalizer::GenerateLexemVector()
 
 				if (i == curRow.length())
 				{
-					err.errText = "No close quote";
-					ERROR << err;
+					ERROR << "No close quote";
 				}
 				else
 					buf.text += curRow[i];
@@ -179,8 +177,7 @@ void LexicalAnalizer::AnalizeLexems()
 				err.column = iter.column + sz + 1;
 				err.row = iter.row;
 				err.codeRow = sourceCode[iter.row - 1];
-				err.errText = "Wrong number";
-				ERROR << err;
+				ERROR << "Wrong number";
 
 				temp.lexType = LexType::WRONG_LEX;
 			}

@@ -12,10 +12,14 @@ SyntaxAnalizer::SyntaxAnalizer(vector<Token> _tokens, vector<string> _codeSource
 	GenerateSentencesStruct();
 	GenerateJumpOpcodes();
 	for (auto iter : sentences)
+	{
 		iter.showSentence();
-
+		iter.printSentenceToFile();
+	}
 	ShowLabelTable();
 	ShowSegTable();
+	printToFileLabelTable();
+	printToFileSegTable();
 }
 
 void SyntaxAnalizer::GenerateSentencesStruct()
@@ -63,6 +67,22 @@ void SyntaxAnalizer::ShowSegTable()
 	cout << endl << setw(8) << "NAME" << setw(10) << "LENGTH" << endl;
 	for (auto iter : segTable)
 		cout << setw(8) << iter.name << setw(6) << " " << setfill('0') << setw(4) << intToHex(to_string(iter.length), 10) << setfill(' ') << endl;
+}
+
+void SyntaxAnalizer::printToFileLabelTable()
+{
+
+	file << endl << setw(8) << "NAME" << setw(8) << "VALUE" << setw(16) << "SEGMENT NAME" << endl;
+	for (auto iter : labelTable)
+		file << setfill(' ') << setw(8) << iter.name << setw(4) << " " << setfill('0') << setw(4) \
+		<< intToHex(to_string(iter.value), 10) << setfill(' ') << setw(16) << iter.segName << endl;
+}
+
+void SyntaxAnalizer::printToFileSegTable()
+{
+	file << endl << setw(8) << "NAME" << setw(10) << "LENGTH" << endl;
+	for (auto iter : segTable)
+		file << setw(8) << iter.name << setw(6) << " " << setfill('0') << setw(4) << intToHex(to_string(iter.length), 10) << setfill(' ') << endl;
 }
 
 SyntaxAnalizer::~SyntaxAnalizer()

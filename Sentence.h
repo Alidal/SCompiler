@@ -2,6 +2,7 @@
 #include "Global.h"
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 #include "Utilities.h"
 #include "ExceptionProcesser.h"
 #include "Operand.h"
@@ -42,6 +43,7 @@ public:
 	void generateSentenceAttributes(int &curGlobalOffset);
 	void generateJumpOpcode();
 	void showSentence();
+	void printSentenceToFile();
 
 	~Sentence();
 };

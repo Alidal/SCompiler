@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -12,7 +13,7 @@ enum class LexType {
 	DEC_CONST, HEX_CONST, DIRECTIVE, REG32, REG16, REG8, SEG_REG, WRONG_LEX
 };
 
-enum OpType {
+enum class OpType {
 	OPREG8, OPREG16, OPREG32, IMM, MEM, LABEL, TXT
 };
 
@@ -51,3 +52,4 @@ struct ErrInfo
 };
 
 static Segment curSeg;
+//static ofstream file;

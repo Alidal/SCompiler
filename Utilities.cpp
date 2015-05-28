@@ -27,6 +27,8 @@ map<string, string> segmentReplacePrefix;
 map<string, string> regNumbers;
 map<string, string> reg16Combinations;
 
+ofstream file;
+
 bool isDirective(string s)
 {
 	return directives.find(s) != directives.end();
@@ -95,7 +97,7 @@ bool isCharComment(char ch)
 string stringToHex(const string input)
 {
 	const char* const alphabet = "0123456789ABCDEF";
-	size_t len = input.length();	
+	size_t len = input.length();
 	string res = "";
 
 	for (int i = 1; i < len - 1; ++i)
@@ -129,7 +131,9 @@ void initCommandBytes()
 	commandBytes.insert(std::pair<string, string>("ADC_mem_reg16-32", "11"));
 	commandBytes.insert(std::pair<string, string>("SUB_reg8_mem", "2A"));
 	commandBytes.insert(std::pair<string, string>("SUB_reg16-32_mem", "2B"));
-	commandBytes.insert(std::pair<string, string>("JC", "72"));
+
+	commandBytes.insert(std::pair<string, string>("JC_islabel", "72"));
+	commandBytes.insert(std::pair<string, string>("JC_nolabel", "0F 82"));
 	commandBytes.insert(std::pair<string, string>("JMP", "EB"));
 }
 
@@ -147,6 +151,7 @@ void initRegNumbers()
 	regNumbers.insert(std::pair<string, string>("CX", "001"));
 	regNumbers.insert(std::pair<string, string>("DX", "010"));
 	regNumbers.insert(std::pair<string, string>("BX", "011"));
+	regNumbers.insert(std::pair<string, string>("SP", "100"));
 	regNumbers.insert(std::pair<string, string>("BP", "101"));
 	regNumbers.insert(std::pair<string, string>("SI", "110"));
 	regNumbers.insert(std::pair<string, string>("DI", "111"));
@@ -254,7 +259,7 @@ string getLabelOffset(string label, vector<Label> labelTable)
 	for (int i = 0; i < labelTable.size(); ++i)
 		if (labelTable[i].name == label)
 			return to_string(labelTable[i].value);
-	
+
 	return "";
 }
 
@@ -334,9 +339,9 @@ string getModRMByte(vector<Operand> operands)
 			}
 			else
 			{
-				if (iter.type == OPREG32 || iter.type == OPREG16)
+				if (iter.type == OpType::OPREG32 || iter.type == OpType::OPREG16)
 					destinationReg = iter.operand[0].lex.text;
-				else if (iter.type == IMM)
+				else if (iter.type == OpType::IMM)
 				{
 					isIMM = true;
 					mod = "11";
@@ -385,11 +390,28 @@ string getSIBByte(vector<Operand> operands)
 
 	if (!base.empty() && !index.empty())
 		return ss + index + base;
-	
+
 	return "";
 }
 
 int subHexNumbers(string op1, string op2)
 {
 	return stoi(op1, nullptr, 16) - stoi(op2, nullptr, 16);
+}
+
+int sumHexNumbers(string op1, string op2)
+{
+	return stoi(op1, nullptr, 16) + stoi(op2, nullptr, 16);
+}
+
+bool checkIsInLabelTable(string name, vector<Label> labelTable)
+{
+	for (auto iter : labelTable)
+	{
+		if (iter.name == name)
+		{
+			return true;
+		}
+	}
+	return false;
 }

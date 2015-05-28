@@ -18,6 +18,8 @@ class SyntaxAnalizer
 	void GenerateJumpOpcodes();
 	void ShowLabelTable();
 	void ShowSegTable();
+	void printToFileLabelTable();
+	void printToFileSegTable();
 public:
 	SyntaxAnalizer(vector<Token> _tokens, vector<string> _codeSource);
 	~SyntaxAnalizer();

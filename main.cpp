@@ -1,14 +1,16 @@
 // SCompiler.cpp : Defines the entry point for the console application.
 //
 #pragma warning(disable: 4018)
-#include <iostream>
-
+#include "Global.h"
 #include "LexicalAnalizer.h"
 #include "SyntaxAnalizer.h"
 
 int main(int argc, char* argv[])
 {
-	LexicalAnalizer analizer("Test.asm");
+	string name = "ErrTest";
+	file.open(name + ".lst");
+	LexicalAnalizer analizer(name + ".asm");
 	SyntaxAnalizer syntAnalizer(analizer.getTokens(), analizer.getSourceCode());
+	file.close();
 	return 0;
 }

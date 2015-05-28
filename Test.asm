@@ -19,6 +19,7 @@ label1:
     adc vw[bp+di], ax
     jc label2
     sub ax, vw[eax+edx]
+    sub sp, vw[bx+si]
     shr ax,1
     not vB[bp+di]
     Sub ax,vw[bp+di]
